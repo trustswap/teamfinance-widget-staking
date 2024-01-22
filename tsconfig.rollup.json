@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+      "jsx": "react-jsx",
+      "allowSyntheticDefaultImports": true,
+      "module": "ESNext",
+      "declaration": true,
+      "outDir": "./dist",
+      "paths": {
+        "@components/*": ["./src/components/*"],
+        "@connection/*": ["./src/connection/*"],
+        "@context/*": ["./src/context/*"],
+        "@data/*": ["./src/data/*"],
+        "@hooks/*": ["./src/hooks/*"],
+        "@pages/*": ["./src/pages/*"],
+        "@resources/*": ["./src/resources/*"],
+        "@styles/*": ["./src/styles/*"],
+        "@types/*": ["./src/types/*"],
+        "@ui/*": ["./src/ui/*"],
+        "@utils/*": ["./src/utils/*"],
+        "@img/*":["public/images/*"]
+      }
+    },
+    "exclude": ["node_modules", "dist", "stories", "storybook-static", "out"]
+  }

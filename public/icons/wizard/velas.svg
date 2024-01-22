@@ -1,0 +1,10 @@
+<svg width="1000" height="1000" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g clip-path="url(#clip0_4390_27542)">
+    <path d="M688.095 390.952L500 719.524L311.905 388.571H688.095V390.952ZM876.19 279.048H123.81L500 940.952L876.19 279.048ZM0 60L61.9048 169.524H935.714L1000 60H0Z" fill="#0037C1"/>
+  </g>
+  <defs>
+    <clipPath id="clip0_4390_27542">
+      <rect width="1000" height="880.952" fill="white" transform="translate(0 60)"/>
+    </clipPath>
+  </defs>
+</svg>

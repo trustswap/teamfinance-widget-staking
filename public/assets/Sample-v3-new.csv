@@ -1,0 +1,39 @@
+Wallet address,Wallet nickname (optional),Number of tokens to vest*,Relationship,Vesting start date (DD/MM/YYYY),Length of Schedule**,Vesting cadence,Lockup length (months) - optional,Lockup percentage (%) - optional
+0x29bD57D591Ad823f98d3cd73Da938a56aB4945E4,Steve Johnson,100,Investor,30/12/2022,4Y;6M;30D,Per second,6,25
+0x3d24e6689E7c03c552302207985E1bD87CebD7DC,Juanito Perez,200,Investor,30/12/2023,4Y;6M,Per hour,9,10
+0x6a0b2457d43424692030fcd98d83469750cdc991,Bruce Lee,300,Employee,30/12/2024,4Y,Quarterly,12,20
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+Make sure to read the comments below before proceeding :) ,,,,,,,,
+,,,,,,,,
+,,,,,,,,
+"Required Fields***:
+
+- Wallet address 
+
+- Number of tokens to vest
+
+- Relationship (Investor or Employee)
+
+- Start date (format DD/MM/YYYY)
+
+- Length of schedule (Number of years, months, days). This is how long you want the vesting contract to last for. Example, for a 4 year contract, simply put 4Y. 4 years 6 months = 4Y;6M
+
+- Vesting cadence (Per second/day/week/month, Quarterly, Annually) ",,"Optional Fields: 
+
+- Wallet nickname 
+
+- Lockup length (months)
+
+- Lockup percentage ",,,,,,
+,,,,,,,,
+*please do NOT use commas ',' or decimals '.' when stating token values. For example, instead of 10,000 tokens, please write 10000 ,,,,,,,,
+,,,,,,,,
+**please make sure to only use semi colons ';' to separate years, months and days. Do NOT use commas ',' or decimals '.' ,,,,,,,,
+,,,,,,,,
+***please make sure NOT to include extra spaces after an input. This will lead to system errors. ,,,,,,,,
+,,,,,,,,
+****please make sure to DELETE ALL THESE **COMMENTS AND REQUIRED FIELDS BEFORE UPLOADING. This will make sure our systems don't get confused :)  ,,,,,,,,

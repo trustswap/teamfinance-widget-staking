@@ -1,0 +1,13 @@
+{
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
+    "display": "browser",
+    "scope": "/",
+    "start_url": "/",
+    "name": "Team Finance: Token & Liquidity Locks",
+    "short_name": "Team Finance",
+    "description": "Lock any ERC20 coin & LP Tokens in a non-custodial, time released smart contract vault. Create Smart Liquidity Locking with BSC, ETH, AVAX, Polygon blockchains instantly.",
+    "icons": {
+        "name": "favicon.ico"
+    }
+}
