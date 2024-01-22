@@ -26,36 +26,36 @@ export default function StakingData({
     <>
       <div className="mb-3 mt-3 grid grid-cols-2 gap-4">
         <div>
-          <Typography className="" variant="caption-2">
+          <Typography variant="caption-2">
             Blockchain
           </Typography>
-          <Typography className="" variant="paragraph">
+          <Typography variant="paragraph">
             {blockchainByChainId('0x61')}
           </Typography>
         </div>
         <div>
-          <Typography className="" variant="caption-2">
+          <Typography variant="caption-2">
             APY
           </Typography>
-          <Typography className="" variant="paragraph">
+          <Typography variant="paragraph">
             {apy}
           </Typography>
         </div>
       </div>
       <div className="mb-3 grid grid-cols-2 gap-4">
         <div>
-          <Typography className="" variant="caption-2">
+          <Typography variant="caption-2">
             Total Rewards
           </Typography>
-          <Typography className="" variant="paragraph">
+          <Typography variant="paragraph">
             {totalRewards} {stakingToken?.symbol ?? '-'}
           </Typography>
         </div>
         <div>
-          <Typography className="" variant="caption-2">
+          <Typography variant="caption-2">
             Your Reward
           </Typography>
-          <Typography className="" variant="paragraph">
+          <Typography variant="paragraph">
             {userRewards} {stakingToken?.symbol ?? '-'}
           </Typography>
         </div>
@@ -63,18 +63,18 @@ export default function StakingData({
 
       <div className="mb-3 grid grid-cols-2 gap-4">
         <div>
-          <Typography className="" variant="caption-2">
+          <Typography variant="caption-2">
             Total Staked
           </Typography>
-          <Typography className="" variant="paragraph">
+          <Typography variant="paragraph">
             {totalStaked} {stakingToken?.symbol ?? '-'}
           </Typography>
         </div>
         <div>
-          <Typography className="" variant="caption-2">
+          <Typography variant="caption-2">
             Your stake
           </Typography>
-          <Typography className="" variant="paragraph">
+          <Typography variant="paragraph">
             {userAmountStaked} {stakingToken?.symbol ?? '-'}
           </Typography>
         </div>
@@ -82,18 +82,18 @@ export default function StakingData({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Typography className="" variant="caption-2">
+          <Typography variant="caption-2">
             Start Date
           </Typography>
-          <Typography className="" variant="paragraph">
+          <Typography variant="paragraph">
             {startDate}
           </Typography>
         </div>
         <div>
-          <Typography className="" variant="caption-2">
+          <Typography variant="caption-2">
             End Date
           </Typography>
-          <Typography className="" variant="paragraph">
+          <Typography variant="paragraph">
             {endDate}
           </Typography>
         </div>

@@ -1,3 +1,4 @@
+import { RadioGroup } from '@headlessui/react'
 import classNames from 'classnames'
 import { BigNumber, constants, Contract, ethers } from 'ethers'
 import moment from 'moment'
@@ -9,9 +10,17 @@ import useWagmi from '../../hooks/useWagmi'
 import { ERC20 } from '../../resources/contracts'
 import { Badge, Button, Input, Typography } from '../../ui'
 import { formatNumber } from '../../utils'
+import CustomSwitch from '../CustomSwitch'
 import Modal from '../Modal'
 import ModalWallets from '../WalletMenu/ModalWallets'
 import StakingData from './StakingData'
+
+const StakingPercentages = [
+  { value: 0.25, label: '25%' },
+  { value: 0.5, label: '50%' },
+  { value: 0.75, label: '75%' },
+  { value: 1, label: 'MAX' },
+]
 
 interface StakeInfoProps {
   poolId: number
@@ -36,7 +45,7 @@ export default function StakingInfo({
   const [endDate, setEndDate] = useState('12 Jum 2023 3:50 UTC +4')
   const [userBalance, setUserBalance] = useState('0')
   const [amount, setAmountState] = useState('')
-  const [show, setShow] = useState(0)
+  const [show, setShow] = useState(false)
   const [modalApproveOpen, setModalApproveOpen] = useState(false)
   const [modalStakeOpen, setModalStakeOpen] = useState(false)
   const [modalUnstakeOpen, setModalUnstakeOpen] = useState(false)
@@ -47,6 +56,7 @@ export default function StakingInfo({
   const [userTokenAllowance, setUserTokenAllowance] = useState(
     BigNumber.from(0)
   )
+  const [stakingPercentage, setStakingPercentage] = useState(0)
   const [userStakedAmount, setUserStakedAmount] = useState('')
   const [totalStaked, setTotalStaked] = useState('')
   const [walletConnected, setWalletConnected] = useState(false)
@@ -74,16 +84,16 @@ export default function StakingInfo({
 
       setButtonDisabled(
         (blockPeriod && blockPeriod > new Date().getTime() / 1000) ||
-          Number.isNaN(parseFloat(value)) ||
-          (maxStakingAmount && parseFloat(value) > maxStakingAmount) ||
-          !(parseFloat(value) > 0) ||
-          parseFloat(userBalance) < parseFloat(value)
+        Number.isNaN(parseFloat(value)) ||
+        (maxStakingAmount && parseFloat(value) > maxStakingAmount) ||
+        !(parseFloat(value) > 0) ||
+        parseFloat(userBalance) < parseFloat(value)
       )
 
       setButtonClaimDisabled(
         Number.isNaN(parseFloat(value)) ||
-          !(parseFloat(value) > 0) ||
-          parseFloat(userStakedAmount) < parseFloat(value)
+        !(parseFloat(value) > 0) ||
+        parseFloat(userStakedAmount) < parseFloat(value)
       )
 
       setButtonApproveDisabled(
@@ -141,7 +151,7 @@ export default function StakingInfo({
       const APR = `${formatNumber(
         Math.round(
           ((rewardPerSecond / formattedTotalStaked) * SECONDS_PER_YEAR * 100) /
-            10 ** tokenDecimals
+          10 ** tokenDecimals
         )
       ).toString()}%`
       return APR
@@ -259,16 +269,19 @@ export default function StakingInfo({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address])
 
-  const handleClick = (e: any, buttonValue: string) => {
+
+
+  const handleClick = (buttonValue: number) => {
+    setStakingPercentage(buttonValue)
     let balanceToCalc = userStakedAmount
-    if (show === 0) {
+    if (!show) {
       balanceToCalc = userBalance
     }
     console.log('balance to Calc:', balanceToCalc)
     setAmount(
       (
         (parseFloat(balanceToCalc.replaceAll(',', '.')) *
-          parseInt(buttonValue, 10)) /
+          buttonValue) /
         100
       ).toString()
     )
@@ -385,16 +398,12 @@ export default function StakingInfo({
     setModalStakeOpen(false)
   }
 
-  const handleClickType = (e: any, data: string) => {
-    setShow(parseInt(data, 10))
-  }
-
   const renderButtons = () => {
     if (!walletConnected) {
       return <Button onClick={handleOpenConnectWallet}>Connect Wallet</Button>
     }
 
-    if (show === 1) {
+    if (show) {
       return (
         <Button
           onClick={handleClaim}
@@ -427,57 +436,37 @@ export default function StakingInfo({
   }
 
   const renderBalance = () => {
-    if (show === 0) {
+    if (!show) {
       return (
-        <p className="my-3 text-sm font-medium text-neutral-600 ">
-          Balance {userBalance} {stakingToken?.symbol ?? '-'}
-        </p>
+        <div className='space-x-2'>
+          <span className='text-black/65'>Balance:</span>
+          <span className='text-black'>{userBalance} {stakingToken?.symbol ?? '-'}</span>
+        </div>
       )
     }
 
     return (
-      <p className="my-3 text-sm font-medium text-neutral-600 ">
-        Staked {userStakedAmount} {stakingToken?.symbol ?? '-'}
-      </p>
+      <div className='space-x-2'>
+        <span className='text-black/65'>Staked:</span>
+        <span className='text-black'>{userStakedAmount} {stakingToken?.symbol ?? '-'}</span>
+      </div>
     )
   }
 
   return (
     <>
-      <div className="mb-3 mt-3 grid grid-cols-4 gap-4">
-        <div className="col-span-2 items-center text-center">
-          <Button
-            className={classNames(
-              'max-h-6 text-xs',
-              show === 0 ? 'bg-transparent text-[#000000]' : ''
-            )}
-            onClick={(e) => handleClickType(e, '0')}
-            disabled={show === 0}
-          >
-            Stake More
-          </Button>
-        </div>
-        <div className="items-center text-center">
-          <Button
-            className={classNames(
-              'max-h-6 text-xs',
-              show === 1 ? 'bg-transparent text-[#000000]' : ''
-            )}
-            onClick={(e) => handleClickType(e, '1')}
-            disabled={show === 1}
-          >
-            Claim
-          </Button>
-        </div>
+      <div className='py-3'>
+        <CustomSwitch show={show}
+          setShow={(checked) => setShow(checked)} />
       </div>
 
       <div>
-        {show === 0 ? (
-          <Typography className="" variant="paragraph">
+        {!show ? (
+          <Typography variant="paragraph">
             Enter the amount of tokens you want to add to this staking pool
           </Typography>
         ) : (
-          <Typography className="" variant="paragraph">
+          <Typography variant="paragraph">
             To withdraw your reward tokens, you must unstake any amount of
             tokens from the pool. It is not necessary to unstake all of your
             tokens. All tokens will be returned to the same wallet address used
@@ -498,7 +487,7 @@ export default function StakingInfo({
 
       <div className="mt-3 flex flex-col">
         <p className="my-1 text-xs font-medium text-neutral-600">
-          Amount to {show === 0 ? 'stake' : 'unstake'}
+          Amount to {!show ? 'stake' : 'unstake'}
         </p>
         <Input
           className="w-full text-sm sm:w-96"
@@ -513,69 +502,43 @@ export default function StakingInfo({
         />
       </div>
 
-      <div className="mt-3 grid grid-cols-6 gap-2">
-        <div className="col-span-2">{renderBalance()}</div>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <div
-            className={classNames(
-              'flex w-full rounded-md bg-[#4687C4] bg-opacity-10 px-2 py-3'
-            )}
-          >
-            <button
-              type="button"
-              className="text-xs"
-              onClick={(e) => handleClick(e, '25')}
-            >
-              25%
-            </button>
+      <div className='flex items-center gap-2 mt-2'>
+        {renderBalance()}
+        <RadioGroup
+          value={stakingPercentage}
+          onChange={(e: number) => {
+            handleClick(e)
+          }}
+        >
+          <RadioGroup.Label className="sr-only">
+            Staking percentage
+          </RadioGroup.Label>
+          <div className="flex flex-row flex-wrap items-center">
+            {StakingPercentages.map((value) => (
+              <RadioGroup.Option
+                key={value.label}
+                value={value}
+                className={({ checked }) =>
+                  classNames(
+                    {
+                      'border border-blue-600': checked,
+                    },
+                    'text-blue-lm mr-2 rounded-md bg-[#4687C31A] px-2 py-1 text-sm font-semibold hover:cursor-pointer hover:bg-slate-200'
+                  )
+                }
+              >
+                <RadioGroup.Label as="h6" className="text-sm">
+                  {value.label}
+                </RadioGroup.Label>
+              </RadioGroup.Option>
+            ))}
           </div>
-          <div
-            className={classNames(
-              'flex w-full rounded-md bg-[#4687C4] bg-opacity-10 px-2 py-3'
-            )}
-          >
-            <button
-              type="button"
-              className="text-xs"
-              onClick={(e) => handleClick(e, '50')}
-            >
-              50%
-            </button>
-          </div>
-        </div>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <div
-            className={classNames(
-              'flex w-full rounded-md bg-[#4687C4] bg-opacity-10 px-2 py-3'
-            )}
-          >
-            <button
-              type="button"
-              className="text-xs"
-              onClick={(e) => handleClick(e, '75')}
-            >
-              75%
-            </button>
-          </div>
-          <div
-            className={classNames(
-              'flex w-full rounded-md bg-[#4687C4] bg-opacity-10 px-2 py-3'
-            )}
-          >
-            <button
-              type="button"
-              className="text-xs"
-              onClick={(e) => handleClick(e, '100')}
-            >
-              MAX
-            </button>
-          </div>
-        </div>
+        </RadioGroup>
       </div>
 
       <div className="mt-3 flex flex-col">{renderButtons()}</div>
 
-      {transactionHash ? (
+      {transactionHash && (
         <div className="mb-1 mt-1">
           <Badge variant="green">
             Success: {transactionHash}
@@ -592,11 +555,9 @@ export default function StakingInfo({
             </button>
           </Badge>
         </div>
-      ) : (
-        <> </>
       )}
 
-{errorMessage ? (
+      {errorMessage && (
         <div className="mb-1 mt-1">
           <Badge variant="red">
             Error: {errorMessage}
@@ -613,8 +574,6 @@ export default function StakingInfo({
             </button>
           </Badge>
         </div>
-      ) : (
-        <> </>
       )}
 
       <Modal setOpen={setModalApproveOpen} open={modalApproveOpen}>
