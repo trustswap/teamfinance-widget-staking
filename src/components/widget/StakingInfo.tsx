@@ -15,7 +15,12 @@ import Modal from '../Modal'
 import ModalWallets from '../WalletMenu/ModalWallets'
 import StakingData from './StakingData'
 
-const StakingPercentages = [
+interface StakingPercentage {
+  value: number
+  label: string
+}
+
+const StakingPercentages: StakingPercentage[] = [
   { value: 0.25, label: '25%' },
   { value: 0.5, label: '50%' },
   { value: 0.75, label: '75%' },
@@ -56,7 +61,10 @@ export default function StakingInfo({
   const [userTokenAllowance, setUserTokenAllowance] = useState(
     BigNumber.from(0)
   )
-  const [stakingPercentage, setStakingPercentage] = useState(0)
+  const [stakingPercentage, setStakingPercentage] = useState({
+    value: -1,
+    label: '',
+  })
   const [userStakedAmount, setUserStakedAmount] = useState('')
   const [totalStaked, setTotalStaked] = useState('')
   const [walletConnected, setWalletConnected] = useState(false)
@@ -84,16 +92,16 @@ export default function StakingInfo({
 
       setButtonDisabled(
         (blockPeriod && blockPeriod > new Date().getTime() / 1000) ||
-        Number.isNaN(parseFloat(value)) ||
-        (maxStakingAmount && parseFloat(value) > maxStakingAmount) ||
-        !(parseFloat(value) > 0) ||
-        parseFloat(userBalance) < parseFloat(value)
+          Number.isNaN(parseFloat(value)) ||
+          (maxStakingAmount && parseFloat(value) > maxStakingAmount) ||
+          !(parseFloat(value) > 0) ||
+          parseFloat(userBalance) < parseFloat(value)
       )
 
       setButtonClaimDisabled(
         Number.isNaN(parseFloat(value)) ||
-        !(parseFloat(value) > 0) ||
-        parseFloat(userStakedAmount) < parseFloat(value)
+          !(parseFloat(value) > 0) ||
+          parseFloat(userStakedAmount) < parseFloat(value)
       )
 
       setButtonApproveDisabled(
@@ -151,7 +159,7 @@ export default function StakingInfo({
       const APR = `${formatNumber(
         Math.round(
           ((rewardPerSecond / formattedTotalStaked) * SECONDS_PER_YEAR * 100) /
-          10 ** tokenDecimals
+            10 ** tokenDecimals
         )
       ).toString()}%`
       return APR
@@ -269,9 +277,7 @@ export default function StakingInfo({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address])
 
-
-
-  const handleClick = (buttonValue: number) => {
+  const handleClick = (buttonValue: StakingPercentage) => {
     setStakingPercentage(buttonValue)
     let balanceToCalc = userStakedAmount
     if (!show) {
@@ -280,9 +286,7 @@ export default function StakingInfo({
     console.log('balance to Calc:', balanceToCalc)
     setAmount(
       (
-        (parseFloat(balanceToCalc.replaceAll(',', '.')) *
-          buttonValue) /
-        100
+        parseFloat(balanceToCalc.replaceAll(',', '.')) * buttonValue.value
       ).toString()
     )
   }
@@ -438,26 +442,29 @@ export default function StakingInfo({
   const renderBalance = () => {
     if (!show) {
       return (
-        <div className='space-x-2'>
-          <span className='text-black/65'>Balance:</span>
-          <span className='text-black'>{userBalance} {stakingToken?.symbol ?? '-'}</span>
+        <div className="space-x-2">
+          <span className="text-black/65">Balance:</span>
+          <span className="text-black">
+            {userBalance} {stakingToken?.symbol ?? '-'}
+          </span>
         </div>
       )
     }
 
     return (
-      <div className='space-x-2'>
-        <span className='text-black/65'>Staked:</span>
-        <span className='text-black'>{userStakedAmount} {stakingToken?.symbol ?? '-'}</span>
+      <div className="space-x-2">
+        <span className="text-black/65">Staked:</span>
+        <span className="text-black">
+          {userStakedAmount} {stakingToken?.symbol ?? '-'}
+        </span>
       </div>
     )
   }
 
   return (
     <>
-      <div className='py-3'>
-        <CustomSwitch show={show}
-          setShow={(checked) => setShow(checked)} />
+      <div className="py-3">
+        <CustomSwitch show={show} setShow={(checked) => setShow(checked)} />
       </div>
 
       <div>
@@ -502,11 +509,11 @@ export default function StakingInfo({
         />
       </div>
 
-      <div className='flex items-center gap-2 mt-2'>
+      <div className="mt-2 flex items-center gap-2">
         {renderBalance()}
         <RadioGroup
           value={stakingPercentage}
-          onChange={(e: number) => {
+          onChange={(e: StakingPercentage) => {
             handleClick(e)
           }}
         >
@@ -523,7 +530,7 @@ export default function StakingInfo({
                     {
                       'border border-blue-600': checked,
                     },
-                    'text-blue-lm mr-2 rounded-md bg-[#4687C31A] px-2 py-1 text-sm font-semibold hover:cursor-pointer hover:bg-slate-200'
+                    'mr-2 rounded-md bg-[#4687C31A] px-2 py-1 text-sm font-semibold text-blue-lm hover:cursor-pointer hover:bg-slate-200'
                   )
                 }
               >
