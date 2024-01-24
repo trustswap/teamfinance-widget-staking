@@ -34,7 +34,6 @@ export default function TestWidget() {
         <Widget
           title="Swap Staking Pool 1"
           poolId={69}
-          blockPeriod={1705888440}
           maxStakingAmount={1000}
         />
       </div>

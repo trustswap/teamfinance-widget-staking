@@ -80,10 +80,12 @@ export default function StakingInfo({
   const setAmount = (value: string) => {
     setAmountState(value)
     try {
+      const userBalanceFloat = parseFloat(userBalance.replace(',',''))
+      const userStakeAmountFloat = parseFloat(userStakedAmount.replace(',',''))
       console.log('part1', !(parseFloat(value) > 0))
-      console.log('part2', parseFloat(userBalance) < parseFloat(value))
-      console.log('part3', parseFloat(userStakedAmount) < parseFloat(value))
-      console.log('part4', !!stakeOnlyOnce && parseFloat(userStakedAmount) > 0)
+      console.log('part2', userBalanceFloat < parseFloat(value))
+      console.log('part3', userStakeAmountFloat < parseFloat(value),userStakeAmountFloat)
+      console.log('part4', !!stakeOnlyOnce && userStakeAmountFloat > 0)
       console.log(
         'part5',
         !!blockWithdrawUntilEnd &&
@@ -101,14 +103,14 @@ export default function StakingInfo({
           Number.isNaN(parseFloat(value)) ||
           (maxStakingAmount && parseFloat(value) > maxStakingAmount) ||
           !(parseFloat(value) > 0) ||
-          parseFloat(userBalance) < parseFloat(value) ||
-          (!!stakeOnlyOnce && parseFloat(userStakedAmount) > 0)
+          userBalanceFloat < parseFloat(value) ||
+          (!!stakeOnlyOnce && userStakeAmountFloat > 0)
       )
 
       setButtonClaimDisabled(
         Number.isNaN(parseFloat(value)) ||
           !(parseFloat(value) > 0) ||
-          parseFloat(userStakedAmount) < parseFloat(value) ||
+          userStakeAmountFloat < parseFloat(value) ||
           (!!blockWithdrawUntilEnd &&
             poolEndTime.gt(
               BigNumber.from(Math.floor(new Date().getTime() / 1000))
@@ -296,6 +298,12 @@ export default function StakingInfo({
       balanceToCalc = userBalance
     }
     console.log('balance to Calc:', balanceToCalc)
+    if (
+      balanceToCalc.indexOf(',') !== -1 &&
+      balanceToCalc.indexOf('.') !== -1
+    ) {
+      balanceToCalc = balanceToCalc.replaceAll(',', '')
+    }
     setAmount(
       (
         parseFloat(balanceToCalc.replaceAll(',', '.')) * buttonValue.value
