@@ -136,7 +136,7 @@ export default function WalletMenu() {
             alt="Icon"
           />
         </button>
-        <Menu as="div" className="relative z-30">
+        <Menu as="div" className="">
           {({ open }) => (
             <>
               <div className="flex items-center text-sm">

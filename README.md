@@ -111,10 +111,12 @@ export default function TestWidget() {
 
 | Propertie name  | description   |
 | :------------: | :------------: |
-| title  |  Ttile of the widget  |
+| title  | Ttile of the widget  |
 | poolId  |  Identification of the pool  |
-|  maxStakingAmount |  (optional) set the max amount of tokens that the user can stake |
-|   classNames |  Tailwind css classes to customize the look and feel |
+| maxStakingAmount |  (optional) set the max amount of tokens that the user can stake |
+| stakeOnlyOnce |  (optional) Boolean, if true: Blocks users to stake if they already have staked |
+| blockWithdrawUntilEnd | (optional) Boolean, if true: Block users to withdraw before the pool end period |
+| classNames | (optional) Tailwind css classes to customize the look and feel |
 
 
 

@@ -11,13 +11,13 @@ import { AutoLink, Typography } from '../../ui'
 import WalletMenu from '../WalletMenu/WalletMenu'
 import StakingInfo from './StakingInfo'
 
-
 interface WidgetProps {
   title: string
   className?: string
   poolId: number
   maxStakingAmount?: number
-  blockPeriod?: number
+  stakeOnlyOnce?: boolean
+  blockWithdrawUntilEnd?: boolean
 }
 
 export default function Widget({
@@ -25,7 +25,8 @@ export default function Widget({
   title,
   poolId,
   maxStakingAmount,
-  blockPeriod,
+  stakeOnlyOnce,
+  blockWithdrawUntilEnd,
 }: WidgetProps) {
   return (
     <WagmiConfig client={wagmiClient}>
@@ -33,7 +34,8 @@ export default function Widget({
         className={classNames(
           className,
           /* 'relative inline-block w-fit max-w-3xl transform rounded-xl bg-[#F6F6FA] p-10 mt-2 ml-2 text-left shadow-xl transition-all sm:align-middle' */
-          'container m-2 inline-block max-w-prose rounded-xl bg-[#F6F6FA] p-5 text-left shadow-xl'
+          // 'container m-2 inline-block max-w-prose rounded-xl bg-[#F6F6FA] p-5 text-left shadow-xl '
+          'container m-2 inline-block max-h-[calc(98vh)] max-w-[calc(77vh)] overflow-y-auto rounded-xl bg-[#F6F6FA] p-5 text-left shadow-xl'
           // 'box-border h-[96vh] w-full p-4 border-4 inline-block max-w-prose rounded-xl bg-[#F6F6FA] p-5 text-left shadow-xl justify-between"'
         )}
       >
@@ -46,16 +48,14 @@ export default function Widget({
         <StakingInfo
           poolId={poolId}
           maxStakingAmount={maxStakingAmount}
-          blockPeriod={blockPeriod}
+          stakeOnlyOnce={stakeOnlyOnce}
+          blockWithdrawUntilEnd={blockWithdrawUntilEnd}
         />
 
         <div className="mt-6 flex items-center border-t border-gray-200 pb-2 pt-4">
           <p className="mr-2 text-base text-black-65">Powered by </p>
           <AutoLink href="https://team.finance">
-            <Image
-              alt="trustswap-logo"
-              src={TrustSwapLogo}
-            />
+            <Image alt="trustswap-logo" src={TrustSwapLogo} />
           </AutoLink>
         </div>
       </div>

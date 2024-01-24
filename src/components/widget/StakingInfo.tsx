@@ -30,13 +30,15 @@ const StakingPercentages: StakingPercentage[] = [
 interface StakeInfoProps {
   poolId: number
   maxStakingAmount?: number
-  blockPeriod?: number
+  stakeOnlyOnce?: boolean
+  blockWithdrawUntilEnd?: boolean
 }
 
 export default function StakingInfo({
   poolId,
   maxStakingAmount,
-  blockPeriod,
+  stakeOnlyOnce,
+  blockWithdrawUntilEnd,
 }: StakeInfoProps) {
   const wagmi = useWagmi()
   const { data: signer } = useSigner()
@@ -48,6 +50,7 @@ export default function StakingInfo({
   const [userRewards, setUserRewards] = useState('-')
   const [startDate, setStartDate] = useState('12 Mar 2023 3:50 UTC +4')
   const [endDate, setEndDate] = useState('12 Jum 2023 3:50 UTC +4')
+  const [poolEndTime, setPoolEndTime] = useState(BigNumber.from(0))
   const [userBalance, setUserBalance] = useState('0')
   const [amount, setAmountState] = useState('')
   const [show, setShow] = useState(false)
@@ -80,28 +83,36 @@ export default function StakingInfo({
       console.log('part1', !(parseFloat(value) > 0))
       console.log('part2', parseFloat(userBalance) < parseFloat(value))
       console.log('part3', parseFloat(userStakedAmount) < parseFloat(value))
-
+      console.log('part4', !!stakeOnlyOnce && parseFloat(userStakedAmount) > 0)
       console.log(
-        'time restriction',
-        blockPeriod && blockPeriod > new Date().getTime() / 1000
+        'part5',
+        !!blockWithdrawUntilEnd &&
+          poolEndTime.gt(
+            BigNumber.from(Math.floor(new Date().getTime() / 1000))
+          )
       )
+
       console.log(
         'ammount restriction',
         maxStakingAmount && parseFloat(value) > maxStakingAmount
       )
 
       setButtonDisabled(
-        (blockPeriod && blockPeriod > new Date().getTime() / 1000) ||
           Number.isNaN(parseFloat(value)) ||
           (maxStakingAmount && parseFloat(value) > maxStakingAmount) ||
           !(parseFloat(value) > 0) ||
-          parseFloat(userBalance) < parseFloat(value)
+          parseFloat(userBalance) < parseFloat(value) ||
+          (!!stakeOnlyOnce && parseFloat(userStakedAmount) > 0)
       )
 
       setButtonClaimDisabled(
         Number.isNaN(parseFloat(value)) ||
           !(parseFloat(value) > 0) ||
-          parseFloat(userStakedAmount) < parseFloat(value)
+          parseFloat(userStakedAmount) < parseFloat(value) ||
+          (!!blockWithdrawUntilEnd &&
+            poolEndTime.gt(
+              BigNumber.from(Math.floor(new Date().getTime() / 1000))
+            ))
       )
 
       setButtonApproveDisabled(
@@ -247,6 +258,7 @@ export default function StakingInfo({
         setStartDate(
           moment(poolInfo.startTime * 1000).format('MM/DD/YYYY HH:mm') ?? '-'
         )
+        setPoolEndTime(poolInfo.endTime)
         setEndDate(
           moment(poolInfo.endTime * 1000).format('MM/DD/YYYY HH:mm') ?? '-'
         )
