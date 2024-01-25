@@ -10,9 +10,7 @@ import {
 } from 'wagmi/actions'
 
 import { ERC20ABI } from '../resources/abi/ERC20'
-import RewardsServiceABI from '../resources/abi/reward-service-abi'
-import { getArtifact } from '../resources/config'
-import { chainIdToHex } from '../utils'
+import RewardsServiceNewABI from '../resources/abi/reward-service-new-abi'
 
 type FunctionParams = {
   functionName: any
@@ -36,8 +34,13 @@ export const useWagmi = () => {
   const { chain } = useNetwork()
 
   const rewardsServiceContract = {
-    address: getArtifact(chainIdToHex(chain?.id)).rewardsService,
-    abi: RewardsServiceABI,
+    address: '',
+    abi: RewardsServiceNewABI,
+  }
+
+
+  const setContractAddress = (contractAddress:string) => {
+    rewardsServiceContract.address = contractAddress
   }
 
   /**
@@ -93,7 +96,7 @@ export const useWagmi = () => {
   ): Promise<SendTransactionResult> => {
     const config = await prepareWriteContract({
       address: rewardsServiceContract.address as any,
-      abi: RewardsServiceABI,
+      abi: RewardsServiceNewABI,
       functionName: params.functionName,
       chainId: chain?.id,
       args: params.args,
@@ -205,7 +208,7 @@ export const useWagmi = () => {
     approve,
   }
 
-  return { Transaction, Contracts, Reader, Token }
+  return { Transaction, Contracts, Reader, Token , setContractAddress }
 }
 
 export default useWagmi

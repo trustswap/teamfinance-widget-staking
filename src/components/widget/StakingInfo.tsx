@@ -4,12 +4,13 @@ import { BigNumber, constants, Contract, ethers } from 'ethers'
 import moment from 'moment'
 import { useEffect, useState } from 'react'
 import { BiX } from 'react-icons/bi'
-import { useAccount, useSigner } from 'wagmi'
+import { useAccount, useNetwork, useSigner } from 'wagmi'
 
+import { ChainType } from '../../connection'
 import useWagmi from '../../hooks/useWagmi'
 import { ERC20 } from '../../resources/contracts'
 import { Badge, Button, Input, Typography } from '../../ui'
-import { formatNumber } from '../../utils'
+import { formatNumber, toHex } from '../../utils'
 import CustomSwitch from '../CustomSwitch'
 import Modal from '../Modal'
 import ModalWallets from '../WalletMenu/ModalWallets'
@@ -27,25 +28,41 @@ const StakingPercentages: StakingPercentage[] = [
   { value: 1, label: 'MAX' },
 ]
 
+interface InfoMessage {
+  id: number
+  message: string
+  active: boolean
+}
+
+const StakingInfoData: InfoMessage[] = [
+  { id: 0, message: 'Maximum amount is ', active: false },
+  { id: 1, message: 'You can only stake once', active: false}
+]
+
+const ClaimInfoData: InfoMessage[] = [
+  { id: 0, message: 'Unstake available after end period', active: false },
+]
+
 interface StakeInfoProps {
-  poolId: number
   maxStakingAmount?: number
   stakeOnlyOnce?: boolean
   blockWithdrawUntilEnd?: boolean
+  supportedChains: ChainType[]
 }
 
 export default function StakingInfo({
-  poolId,
   maxStakingAmount,
   stakeOnlyOnce,
   blockWithdrawUntilEnd,
+  supportedChains,
 }: StakeInfoProps) {
+  const { chain } = useNetwork()
   const wagmi = useWagmi()
   const { data: signer } = useSigner()
   const { address } = useAccount()
   const SECONDS_PER_YEAR = 31536000
 
-  const [totalRewards, setTotalRewards] = useState(250000.0)
+  const [totalRewards, setTotalRewards] = useState(0)
   const [apy, setApy] = useState('-')
   const [userRewards, setUserRewards] = useState('-')
   const [startDate, setStartDate] = useState('12 Mar 2023 3:50 UTC +4')
@@ -57,6 +74,9 @@ export default function StakingInfo({
   const [modalApproveOpen, setModalApproveOpen] = useState(false)
   const [modalStakeOpen, setModalStakeOpen] = useState(false)
   const [modalUnstakeOpen, setModalUnstakeOpen] = useState(false)
+  const [modalUnstakeRewardsOpen, setModalUnstakeRewardsOpen] = useState(false)
+  const [poolId, setPoolId] = useState(0)
+  const [contractAddress, setContractAddress] = useState('')
 
   const [stakingToken, setStakingToken] = useState(null)
   const [isApproved, setIsApproved] = useState(false)
@@ -73,18 +93,42 @@ export default function StakingInfo({
   const [walletConnected, setWalletConnected] = useState(false)
   const [isButtonDisabled, setButtonDisabled] = useState(true)
   const [isButtonClaimDisabled, setButtonClaimDisabled] = useState(true)
+  const [isButtonClaimRewardsDisabled, setButtonClaimRewardsDisabled] =
+    useState(true)
   const [isButtonApproveDisabled, setButtonApproveDisabled] = useState(false)
   const [transactionHash, setTransactionHash] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
+  const [isChainSupported, setChainSupported] = useState(false)
+  const [claimInfoMessages, setClaimInfoMessages] = useState(ClaimInfoData)
+  const [stakingInfoMessages, setStakingInfoMessages] =
+    useState(StakingInfoData)
+
+  const setClaimInfo = (id: number, status: boolean, message?: string) => {
+    const msgs = claimInfoMessages
+    msgs[id].active = status
+    if (message) msgs[id].message = message
+    setClaimInfoMessages(msgs)
+  }
+
+  const setStakingInfo = (id: number, status: boolean, message?: string) => {
+    const msgs = stakingInfoMessages
+    msgs[id].active = status
+    if (message) msgs[id].message = message
+    setStakingInfoMessages(msgs)
+  }
 
   const setAmount = (value: string) => {
     setAmountState(value)
     try {
-      const userBalanceFloat = parseFloat(userBalance.replace(',',''))
-      const userStakeAmountFloat = parseFloat(userStakedAmount.replace(',',''))
+      const userBalanceFloat = parseFloat(userBalance.replace(',', ''))
+      const userStakeAmountFloat = parseFloat(userStakedAmount.replace(',', ''))
       console.log('part1', !(parseFloat(value) > 0))
       console.log('part2', userBalanceFloat < parseFloat(value))
-      console.log('part3', userStakeAmountFloat < parseFloat(value),userStakeAmountFloat)
+      console.log(
+        'part3',
+        userStakeAmountFloat < parseFloat(value),
+        userStakeAmountFloat
+      )
       console.log('part4', !!stakeOnlyOnce && userStakeAmountFloat > 0)
       console.log(
         'part5',
@@ -94,13 +138,34 @@ export default function StakingInfo({
           )
       )
 
+      if(!!stakeOnlyOnce && userStakeAmountFloat > 0){
+        setStakingInfo(1, true)
+      }else{
+        setStakingInfo(1, false)
+      }
+
+      if (
+        !!blockWithdrawUntilEnd &&
+        poolEndTime.gt(BigNumber.from(Math.floor(new Date().getTime() / 1000)))
+      ) {
+        setClaimInfo(0, true)
+      } else {
+        setClaimInfo(0, false)
+      }
+
       console.log(
         'ammount restriction',
         maxStakingAmount && parseFloat(value) > maxStakingAmount
       )
 
+      if (maxStakingAmount && parseFloat(value) > maxStakingAmount) {
+        setStakingInfo(0, true, `Maximum amount is ${maxStakingAmount} `)
+      } else {
+        setStakingInfo(0, false)
+      }
+
       setButtonDisabled(
-          Number.isNaN(parseFloat(value)) ||
+        Number.isNaN(parseFloat(value)) ||
           (maxStakingAmount && parseFloat(value) > maxStakingAmount) ||
           !(parseFloat(value) > 0) ||
           userBalanceFloat < parseFloat(value) ||
@@ -155,6 +220,19 @@ export default function StakingInfo({
     setWalletModalOpen(true)
   }
 
+  const clearValues = () => {
+    setStakingToken(null)
+    setApy('-')
+    setStartDate('-')
+    setEndDate('-')
+    setTotalRewards(0)
+    setUserBalance('-')
+    setUserRewards('-')
+    setUserTokenAllowance(BigNumber.from(0))
+    setTotalStaked('')
+    setUserStakedAmount('')
+  }
+
   const calculateAPR = (pool: any, tokenDecimals: any) => {
     console.log('pool', pool)
     console.log('staked', pool.totalStaked)
@@ -202,94 +280,114 @@ export default function StakingInfo({
   }, [isApproved, stakingToken, userBalance, amount, userTokenAllowance])
 
   useEffect(() => {
-    const fetchUserStats = async () => {
-      try {
-        const res = await wagmi.Reader.getPoolAndUserInfo(
-          address,
-          BigNumber.from(poolId)
-        )
-        const userInfo = res[0]
-        const pendingReward = res[1]
-        const poolInfo = res[2]
-
-        const stakingTokenAddress = poolInfo.stakingToken
-        const [tokenAllowance, balance] =
-          await wagmi.Token.getAllowanceAndBalance(
-            address,
-            stakingTokenAddress,
-            wagmi.Contracts.rewardsServiceContract.address
-          )
-
-        const token = await wagmi.Token.getToken(stakingTokenAddress)
-
-        console.log(
-          'USE tokenAllowance',
-          tokenAllowance.toString(),
-          tokenAllowance
-        )
-        console.log('USE user balance', balance.toString())
-        console.log('USE token', token)
-        const bal = formatNumber(
-          Number(ethers.utils.formatUnits(balance, token.decimals))
-        )
-
-        const APR = calculateAPR(poolInfo, token.decimals)
-        console.log('APR', APR)
-
-        const userAmountStaked = formatNumber(
-          Number(ethers.utils.formatUnits(userInfo.amount, token.decimals))
-        )
-
-        const pools = await wagmi.Reader.getPools()
-        console.log(pools)
-        const formattedTotalRewards = parseFloat(
-          ethers.utils.formatUnits(poolInfo.totalReward, token.decimals)
-        )
-
-        const reward = formatNumber(
-          Number(ethers.utils.formatUnits(pendingReward, token.decimals))
-        )
-
-        const totalStakedFormated = formatNumber(
-          Number(ethers.utils.formatUnits(poolInfo.totalStaked, token.decimals))
-        )
-
-        console.log(reward)
-        setStakingToken(token)
-        setApy(APR)
-        setStartDate(
-          moment(poolInfo.startTime * 1000).format('MM/DD/YYYY HH:mm') ?? '-'
-        )
-        setPoolEndTime(poolInfo.endTime)
-        setEndDate(
-          moment(poolInfo.endTime * 1000).format('MM/DD/YYYY HH:mm') ?? '-'
-        )
-        setTotalRewards(formattedTotalRewards)
-        setUserBalance(bal.toString())
-        setUserRewards(reward.toString())
-        setUserTokenAllowance(tokenAllowance)
-        setUserStakedAmount(userAmountStaked.toString())
-        setTotalStaked(totalStakedFormated.toString())
-      } catch (error) {
-        console.error(error)
-        setErrorMessage('Staking Pool Contract not found')
+    try {
+      if (chain) {
+        const userPoolId = supportedChains.filter(
+          (userChain) => userChain.chainId === toHex(chain.id)
+        )[0].poolId
+        const userContractAddress = supportedChains.filter(
+          (userChain) => userChain.chainId === toHex(chain.id)
+        )[0].contractAddress
+        setChainSupported(true)
+        setPoolId(userPoolId)
+        wagmi.setContractAddress(userContractAddress)
+        setContractAddress(userContractAddress)
       }
+    } catch (e) {
+      console.log(e)
+      setErrorMessage('Selected Chain is not supported ')
+      setChainSupported(false)
+      if (isChainSupported) clearValues()
     }
-    if (address) {
+  }, [chain, contractAddress, poolId, supportedChains, wagmi, isChainSupported])
+
+  const fetchUserStats = async () => {
+    try {
+      const res = await wagmi.Reader.getPoolAndUserInfo(
+        address,
+        BigNumber.from(poolId)
+      )
+      const userInfo = res[0]
+      const pendingReward = res[1]
+      const poolInfo = res[2]
+
+      const stakingTokenAddress = poolInfo.stakingToken
+      const [tokenAllowance, balance] =
+        await wagmi.Token.getAllowanceAndBalance(
+          address,
+          stakingTokenAddress,
+          wagmi.Contracts.rewardsServiceContract.address
+        )
+
+      const token = await wagmi.Token.getToken(stakingTokenAddress)
+
+      console.log(
+        'USE tokenAllowance',
+        tokenAllowance.toString(),
+        tokenAllowance
+      )
+      console.log('USE user balance', balance.toString())
+      console.log('USE token', token)
+      const bal = formatNumber(
+        Number(ethers.utils.formatUnits(balance, token.decimals))
+      )
+
+      const APR = calculateAPR(poolInfo, token.decimals)
+      console.log('APR', APR)
+
+      const userAmountStaked = formatNumber(
+        Number(ethers.utils.formatUnits(userInfo.amount, token.decimals))
+      )
+
+      const pools = await wagmi.Reader.getPools()
+      console.log(pools)
+      const formattedTotalRewards = parseFloat(
+        ethers.utils.formatUnits(poolInfo.totalReward, token.decimals)
+      )
+
+      const reward = formatNumber(
+        Number(ethers.utils.formatUnits(pendingReward, token.decimals))
+      )
+
+      const totalStakedFormated = formatNumber(
+        Number(ethers.utils.formatUnits(poolInfo.totalStaked, token.decimals))
+      )
+
+      console.log(reward)
+      setStakingToken(token)
+      setApy(APR)
+      setStartDate(
+        moment(poolInfo.startTime * 1000).format('MM/DD/YYYY HH:mm') ?? '-'
+      )
+      setPoolEndTime(poolInfo.endTime)
+      setEndDate(
+        moment(poolInfo.endTime * 1000).format('MM/DD/YYYY HH:mm') ?? '-'
+      )
+      setTotalRewards(formattedTotalRewards)
+      setUserBalance(bal.toString())
+      setUserRewards(reward.toString())
+      setButtonClaimRewardsDisabled(pendingReward.eq(0))
+
+      setUserTokenAllowance(tokenAllowance)
+      setUserStakedAmount(userAmountStaked.toString())
+      setTotalStaked(totalStakedFormated.toString())
+      setErrorMessage('')
+    } catch (error) {
+      console.error(error)
+      setErrorMessage('Staking Pool Contract not found')
+      clearValues()
+    }
+  }
+
+  useEffect(() => {
+    if (address && contractAddress) {
       fetchUserStats()
     } else {
-      setStakingToken(null)
-      setApy('-')
-      setStartDate('-')
-      setEndDate('-')
-      setTotalRewards(0)
-      setUserBalance('-')
-      setUserRewards('-')
-      setUserTokenAllowance(BigNumber.from(0))
+      clearValues()
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address])
+  }, [address, contractAddress, poolId, chain])
 
   const handleClick = (buttonValue: StakingPercentage) => {
     setStakingPercentage(buttonValue)
@@ -329,6 +427,25 @@ export default function StakingInfo({
     }
   }
 
+  const handleClaimReward = async () => {
+    try {
+      setTransactionHash('')
+      setModalUnstakeRewardsOpen(true)
+      const tx = await wagmi.Transaction.send({
+        functionName: 'claimReward',
+        args: [BigNumber.from(poolId)],
+      })
+      console.log(tx)
+      await tx.wait()
+      setTransactionHash(tx.hash)
+      console.log('success')
+      fetchUserStats()
+    } catch (e) {
+      console.log(e)
+    }
+    setModalUnstakeRewardsOpen(false)
+  }
+
   const handleClaim = async () => {
     try {
       setTransactionHash('')
@@ -345,6 +462,7 @@ export default function StakingInfo({
       await tx.wait()
       setTransactionHash(tx.hash)
       console.log('success')
+      fetchUserStats()
     } catch (e) {
       console.log(e)
     }
@@ -416,6 +534,7 @@ export default function StakingInfo({
       await tx.wait()
       setTransactionHash(tx.hash)
       console.log('success')
+      fetchUserStats()
     } catch (e) {
       console.log(e)
     }
@@ -429,12 +548,26 @@ export default function StakingInfo({
 
     if (show) {
       return (
-        <Button
-          onClick={handleClaim}
-          disabled={Number.isNaN(parseFloat(amount)) || isButtonClaimDisabled}
-        >
-          Unstake {stakingToken?.symbol ?? '-'}
-        </Button>
+        <div className="flex grid grid-cols-2 gap-1">
+          <div className="flex flex-col">
+            <Button
+              onClick={handleClaim}
+              disabled={
+                Number.isNaN(parseFloat(amount)) || isButtonClaimDisabled
+              }
+            >
+              Unstake {stakingToken?.symbol ?? '-'}
+            </Button>
+          </div>
+          <div className="flex flex-col">
+            <Button
+              onClick={handleClaimReward}
+              disabled={isButtonClaimRewardsDisabled}
+            >
+              Unstake Rewards {stakingToken?.symbol ?? '-'}
+            </Button>
+          </div>
+        </div>
       )
     }
 
@@ -444,7 +577,7 @@ export default function StakingInfo({
           onClick={handleStake}
           disabled={Number.isNaN(parseFloat(amount)) || isButtonDisabled}
         >
-          Stake more {stakingToken?.symbol ?? '-'}
+          Stake {stakingToken?.symbol ?? '-'}
         </Button>
       )
     }
@@ -481,6 +614,26 @@ export default function StakingInfo({
     )
   }
 
+  const renderInfos = () => {
+    const stakingMsg = stakingInfoMessages.find((info)=>info.active===true)
+    const claimMsg = claimInfoMessages.find((info)=>info.active===true)
+    return (
+      <>
+        {stakingMsg && !show && (
+          <div className="mb-1 mt-1">
+            <Badge variant="yellow">Info: {stakingMsg.message}</Badge>
+          </div>
+        )}
+
+        {claimMsg && show && (
+          <div className="mt-1">
+            <Badge variant="yellow">Info: {claimMsg.message}</Badge>
+          </div>
+        )}
+      </>
+    )
+  }
+
   return (
     <>
       <div className="py-3">
@@ -510,6 +663,7 @@ export default function StakingInfo({
         endDate={endDate}
         userAmountStaked={userStakedAmount}
         totalStaked={totalStaked}
+        supportedChains={supportedChains}
       />
 
       <div className="mt-3 flex flex-col">
@@ -564,6 +718,8 @@ export default function StakingInfo({
       </div>
 
       <div className="mt-3 flex flex-col">{renderButtons()}</div>
+
+      {renderInfos()}
 
       {transactionHash && (
         <div className="mb-1 mt-1">
@@ -624,6 +780,18 @@ export default function StakingInfo({
       <Modal setOpen={setModalUnstakeOpen} open={modalUnstakeOpen}>
         <Typography variant="title-2">
           Unstaking {stakingToken?.symbol ?? '-'}
+        </Typography>
+        <Typography variant="title-4">
+          Wait until the blockchain process your request
+        </Typography>
+      </Modal>
+
+      <Modal
+        setOpen={setModalUnstakeRewardsOpen}
+        open={modalUnstakeRewardsOpen}
+      >
+        <Typography variant="title-2">
+          Unstaking Rewards {stakingToken?.symbol ?? '-'}
         </Typography>
         <Typography variant="title-4">
           Wait until the blockchain process your request

@@ -29,6 +29,9 @@ export interface ChainType {
   }
   blockExplorerUrls: [string]
   redirectUrl?: string
+  contractAddress?: string
+  type?: string
+  poolId?:number
 }
 
 export interface ChainRedirectUrlType {

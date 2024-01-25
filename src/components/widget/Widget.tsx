@@ -6,6 +6,7 @@ import React from 'react'
 import { WagmiConfig } from 'wagmi'
 
 import TrustSwapLogo from '../../../public/images/footer/tf-wordmark-primary-blue.svg'
+import { ChainType } from '../../connection'
 import { wagmiClient } from '../../connection/wagmi'
 import { AutoLink, Typography } from '../../ui'
 import WalletMenu from '../WalletMenu/WalletMenu'
@@ -14,19 +15,19 @@ import StakingInfo from './StakingInfo'
 interface WidgetProps {
   title: string
   className?: string
-  poolId: number
   maxStakingAmount?: number
   stakeOnlyOnce?: boolean
   blockWithdrawUntilEnd?: boolean
+  supportedChains: ChainType[]
 }
 
 export default function Widget({
   className,
   title,
-  poolId,
   maxStakingAmount,
   stakeOnlyOnce,
   blockWithdrawUntilEnd,
+  supportedChains
 }: WidgetProps) {
   return (
     <WagmiConfig client={wagmiClient}>
@@ -43,16 +44,16 @@ export default function Widget({
           <Typography className="" variant="title-4">
             {title}
           </Typography>
-          <WalletMenu />
+          <WalletMenu supportedChainsList={supportedChains}/>
         </div>
         <StakingInfo
-          poolId={poolId}
           maxStakingAmount={maxStakingAmount}
           stakeOnlyOnce={stakeOnlyOnce}
           blockWithdrawUntilEnd={blockWithdrawUntilEnd}
+          supportedChains={supportedChains}
         />
 
-        <div className="mt-6 flex items-center border-t border-gray-200 pb-2 pt-4">
+        <div className="mt-1 flex items-center border-t border-gray-200 pb-2 pt-4">
           <p className="mr-2 text-base text-black-65">Powered by </p>
           <AutoLink href="https://team.finance">
             <Image alt="trustswap-logo" src={TrustSwapLogo} />

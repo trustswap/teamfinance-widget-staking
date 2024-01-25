@@ -19,22 +19,30 @@ import {
   useSwitchNetwork,
 } from 'wagmi'
 
-import {
-  mainnetsChains,
-  supportedChainIds,
-  testnetsChains,
-} from '../../connection'
 import { useAppContext } from '../../context/AppContext'
 import { Button, Modal, Typography } from '../../ui'
 import { toHex, walletInfo } from '../../utils'
 import { redirectIfNecessary } from '../../utils/switchNetwork'
 import ModalWallets from './ModalWallets'
 
-export default function WalletMenu() {
+interface WaletMenuProps {
+  supportedChainsList: any[]
+}
+
+export default function WalletMenu({ supportedChainsList }: WaletMenuProps) {
+  const mainnetsChains = supportedChainsList.filter(
+    (chain: any) => chain.type.toLowerCase() === 'mainnet'
+  )
+
+  const testnetsChains = supportedChainsList.filter(
+    (chain: any) => chain.type.toLowerCase() === 'testnet'
+  )
+
+  const supportedChainIds = supportedChainsList.map((chain) => chain.chainId)
+
   const { chain } = useNetwork()
   const [currentChain, setCurrentChain] = useState(mainnetsChains[0])
-  const { openUnsupportedChain, setOpenUnsupportedChain } =
-    useAppContext()
+  const { openUnsupportedChain, setOpenUnsupportedChain } = useAppContext()
   const [chainSelectorModalOpen, setChainSelectorModalOpen] = useState(false)
   const [walletModalOpen, setWalletModalOpen] = useState(false)
   const [walletImage, setWalletImage] = useState('')
@@ -67,7 +75,7 @@ export default function WalletMenu() {
     } catch (error) {
       console.error(error)
     }
-  }, [chain, setOpenUnsupportedChain])
+  }, [chain, setOpenUnsupportedChain, supportedChainIds])
 
   useEffect(() => {
     if (chain) {
@@ -83,7 +91,7 @@ export default function WalletMenu() {
     } else if (!address) {
       setCurrentChain(mainnetsChains[0])
     }
-  }, [address, chain])
+  }, [address, chain, mainnetsChains, testnetsChains])
 
   useEffect(() => {
     const renderAddress = () => {
@@ -125,7 +133,7 @@ export default function WalletMenu() {
       <div className="flex items-center">
         <button
           type="button"
-          className="-mr-px flex h-9 w-9 items-center justify-center rounded-l-md border bg-white hover:bg-gray-100 focus:outline-none"
+          className="-mr-px flex h-9 w-9 items-center justify-center rounded-l-md border bg-white focus:outline-none hover:bg-gray-100"
           onClick={() => setChainSelectorModalOpen(true)}
         >
           <Image
@@ -144,7 +152,7 @@ export default function WalletMenu() {
                   <Menu.Button
                     className={classNames(
                       open ? 'bg-gray-100' : 'bg-white',
-                      'flex h-9 items-center gap-1 rounded-r-md border px-3 py-1.5 hover:bg-gray-100 focus:outline-none'
+                      'flex h-9 items-center gap-1 rounded-r-md border px-3 py-1.5 focus:outline-none hover:bg-gray-100'
                     )}
                   >
                     {width > 768
@@ -163,7 +171,7 @@ export default function WalletMenu() {
                 ) : (
                   <button
                     type="button"
-                    className="flex h-9 items-center gap-1 rounded-r-md border bg-white px-3 py-1.5 hover:bg-gray-100 focus:outline-none"
+                    className="flex h-9 items-center gap-1 rounded-r-md border bg-white px-3 py-1.5 focus:outline-none hover:bg-gray-100"
                     onClick={() => setWalletModalOpen(true)}
                     data-testid="connect-wallet-button"
                   >
@@ -241,7 +249,7 @@ export default function WalletMenu() {
               <Fragment key={item.chainId}>
                 <Button
                   className={classNames('border-0', {
-                    '!border-blue-lm !border-2':
+                    '!border-2 !border-blue-lm':
                       chain?.id === parseInt(item.chainId, 16),
                   })}
                   data-tooltip-id={item.chainId}
@@ -262,15 +270,15 @@ export default function WalletMenu() {
                   icon={
                     <>
                       {chain?.id === parseInt(item.chainId, 16) && (
-                        <BiCheck className="text-blue-lm h-5 w-5" />
+                        <BiCheck className="h-5 w-5 text-blue-lm" />
                       )}
                       {!item.redirectUrl &&
                         chain?.id !== parseInt(item.chainId, 16) && (
-                          <BiChevronRight className="text-black-65 h-5 w-5" />
+                          <BiChevronRight className="h-5 w-5 text-black-65" />
                         )}
                       {item.redirectUrl &&
                         chain?.id !== parseInt(item.chainId, 16) && (
-                          <BiLinkExternal className="text-black-65 h-5 w-5" />
+                          <BiLinkExternal className="h-5 w-5 text-black-65" />
                         )}
                     </>
                   }
@@ -313,7 +321,7 @@ export default function WalletMenu() {
               <Fragment key={item.chainId}>
                 <Button
                   className={classNames('border-0', {
-                    '!border-blue-lm !border-2':
+                    '!border-2 !border-blue-lm':
                       chain?.id === parseInt(item.chainId, 16),
                   })}
                   data-tooltip-id={item.chainId}
@@ -334,15 +342,15 @@ export default function WalletMenu() {
                   icon={
                     <>
                       {chain?.id === parseInt(item.chainId, 16) && (
-                        <BiCheck className="text-blue-lm h-5 w-5" />
+                        <BiCheck className="h-5 w-5 text-blue-lm" />
                       )}
                       {!item.redirectUrl &&
                         chain?.id !== parseInt(item.chainId, 16) && (
-                          <BiChevronRight className="text-black-65 h-5 w-5" />
+                          <BiChevronRight className="h-5 w-5 text-black-65" />
                         )}
                       {item.redirectUrl &&
                         chain?.id !== parseInt(item.chainId, 16) && (
-                          <BiLinkExternal className="text-black-65 h-5 w-5" />
+                          <BiLinkExternal className="h-5 w-5 text-black-65" />
                         )}
                     </>
                   }
