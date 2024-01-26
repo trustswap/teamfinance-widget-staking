@@ -66,8 +66,8 @@ export default function TestWidget() {
       <div className="flex justify-end bg-[#505050]">
         <Widget
           title="Swap Staking Pool 1"
-          maxStakingAmount={1000}
           supportedChains={supportedChains}
+          globalMaxAmount={40}
         />
       </div>
     </div>

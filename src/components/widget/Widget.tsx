@@ -19,6 +19,7 @@ interface WidgetProps {
   stakeOnlyOnce?: boolean
   blockWithdrawUntilEnd?: boolean
   supportedChains: ChainType[]
+  globalMaxAmount?: number
 }
 
 export default function Widget({
@@ -27,7 +28,8 @@ export default function Widget({
   maxStakingAmount,
   stakeOnlyOnce,
   blockWithdrawUntilEnd,
-  supportedChains
+  supportedChains,
+  globalMaxAmount,
 }: WidgetProps) {
   return (
     <WagmiConfig client={wagmiClient}>
@@ -44,13 +46,14 @@ export default function Widget({
           <Typography className="" variant="title-4">
             {title}
           </Typography>
-          <WalletMenu supportedChainsList={supportedChains}/>
+          <WalletMenu supportedChainsList={supportedChains} />
         </div>
         <StakingInfo
           maxStakingAmount={maxStakingAmount}
           stakeOnlyOnce={stakeOnlyOnce}
           blockWithdrawUntilEnd={blockWithdrawUntilEnd}
           supportedChains={supportedChains}
+          globalMaxAmount={globalMaxAmount}
         />
 
         <div className="mt-1 flex items-center border-t border-gray-200 pb-2 pt-4">

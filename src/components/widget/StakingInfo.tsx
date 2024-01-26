@@ -36,7 +36,8 @@ interface InfoMessage {
 
 const StakingInfoData: InfoMessage[] = [
   { id: 0, message: 'Maximum amount is ', active: false },
-  { id: 1, message: 'You can only stake once', active: false}
+  { id: 1, message: 'You can only stake once', active: false },
+  { id: 2, message: 'Value exceeds the maximum pool amount', active: false },
 ]
 
 const ClaimInfoData: InfoMessage[] = [
@@ -48,6 +49,7 @@ interface StakeInfoProps {
   stakeOnlyOnce?: boolean
   blockWithdrawUntilEnd?: boolean
   supportedChains: ChainType[]
+  globalMaxAmount?: number
 }
 
 export default function StakingInfo({
@@ -55,6 +57,7 @@ export default function StakingInfo({
   stakeOnlyOnce,
   blockWithdrawUntilEnd,
   supportedChains,
+  globalMaxAmount,
 }: StakeInfoProps) {
   const { chain } = useNetwork()
   const wagmi = useWagmi()
@@ -102,7 +105,7 @@ export default function StakingInfo({
   const [claimInfoMessages, setClaimInfoMessages] = useState(ClaimInfoData)
   const [stakingInfoMessages, setStakingInfoMessages] =
     useState(StakingInfoData)
-
+  const [stakeAllowedValue, setStakeAllowedValue] = useState(BigNumber.from(0))
   const setClaimInfo = (id: number, status: boolean, message?: string) => {
     const msgs = claimInfoMessages
     msgs[id].active = status
@@ -138,9 +141,9 @@ export default function StakingInfo({
           )
       )
 
-      if(!!stakeOnlyOnce && userStakeAmountFloat > 0){
+      if (!!stakeOnlyOnce && userStakeAmountFloat > 0) {
         setStakingInfo(1, true)
-      }else{
+      } else {
         setStakingInfo(1, false)
       }
 
@@ -164,12 +167,39 @@ export default function StakingInfo({
         setStakingInfo(0, false)
       }
 
+      console.log('debug1', parseFloat(value) ?? 0, stakeAllowedValue)
+      const formattedAmount = ethers.utils.parseUnits(
+        parseFloat(value) ? value : '0',
+        stakingToken.decimals.toString()
+      )
+      console.log('debug2', formattedAmount)
+      console.log(
+        'debug3',
+        formattedAmount.toString(),
+        stakeAllowedValue.toString()
+      )
+      if (formattedAmount.gte(stakeAllowedValue)) {
+        console.log(
+          'part 6 value exceed the global maximim',
+          formattedAmount.gt(stakeAllowedValue)
+        )
+        setStakingInfo(
+          2,
+          true,
+          `Value exceeds the maximum pool amount ${globalMaxAmount ?? ''}`
+        )
+      } else {
+        console.log('part 6', false)
+        setStakingInfo(2, false)
+      }
+
       setButtonDisabled(
         Number.isNaN(parseFloat(value)) ||
           (maxStakingAmount && parseFloat(value) > maxStakingAmount) ||
           !(parseFloat(value) > 0) ||
           userBalanceFloat < parseFloat(value) ||
-          (!!stakeOnlyOnce && userStakeAmountFloat > 0)
+          (!!stakeOnlyOnce && userStakeAmountFloat > 0) ||
+          formattedAmount.gt(stakeAllowedValue)
       )
 
       setButtonClaimDisabled(
@@ -371,6 +401,21 @@ export default function StakingInfo({
       setUserTokenAllowance(tokenAllowance)
       setUserStakedAmount(userAmountStaked.toString())
       setTotalStaked(totalStakedFormated.toString())
+
+      console.log('entering globalMaxAmount', globalMaxAmount)
+      let totalToStake = BigNumber.from(0)
+      if (globalMaxAmount && globalMaxAmount > 0) {
+        console.log('Current totalStaked', poolInfo.totalStaked)
+        const formattedAmount = ethers.utils.parseUnits(
+          globalMaxAmount.toString(),
+          token.decimals
+        )
+        totalToStake = formattedAmount.sub(poolInfo.totalStaked)
+      } else {
+        totalToStake = BigNumber.from(constants.MaxUint256)
+      }
+      setStakeAllowedValue(totalToStake)
+
       setErrorMessage('')
     } catch (error) {
       console.error(error)
@@ -497,6 +542,27 @@ export default function StakingInfo({
   const handleStake = async () => {
     try {
       setModalStakeOpen(true)
+
+      await fetchUserStats()
+      // update values for checking max amounts
+      const formattedAmountCheck = ethers.utils.parseUnits(
+        parseFloat(amount) ? amount : '0',
+        stakingToken.decimals.toString()
+      )
+      if (formattedAmountCheck.gte(stakeAllowedValue)) {
+        console.log(
+          'Stake Canceled',
+          formattedAmountCheck.gt(stakeAllowedValue)
+        )
+        setStakingInfo(
+          2,
+          true,
+          `Value exceeds the maximum pool amount ${globalMaxAmount ?? ''}`
+        )
+        setModalStakeOpen(false)
+        return
+      }
+
       setTransactionHash('')
       const res = await wagmi.Reader.getPoolAndUserInfo(
         address,
@@ -615,8 +681,8 @@ export default function StakingInfo({
   }
 
   const renderInfos = () => {
-    const stakingMsg = stakingInfoMessages.find((info)=>info.active===true)
-    const claimMsg = claimInfoMessages.find((info)=>info.active===true)
+    const stakingMsg = stakingInfoMessages.find((info) => info.active === true)
+    const claimMsg = claimInfoMessages.find((info) => info.active === true)
     return (
       <>
         {stakingMsg && !show && (

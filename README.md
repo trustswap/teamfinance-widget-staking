@@ -144,7 +144,8 @@ export default function TestWidget() {
 | Propertie name  | description   |
 | :------------: | :------------: |
 | title  | Ttile of the widget  |
-| maxStakingAmount |  (optional) set the max amount of tokens that the user can stake |
+| globalMaxAmount | (optional) set the max amount of tokens global on the pool (for all users) | 
+| maxStakingAmount |  (optional) set the max amount of tokens that the each user can stake |
 | stakeOnlyOnce |  (optional) Boolean, if true: Blocks users to stake if they already have staked |
 | blockWithdrawUntilEnd | (optional) Boolean, if true: Block users to withdraw before the pool end period |
 | supportedChains | The list of objects for the supported chains (see supportedChain Object|
