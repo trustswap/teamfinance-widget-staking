@@ -121,7 +121,6 @@ export default function StakingInfo({
   }
 
   const setAmount = (value: string) => {
-    setAmountState(value)
     setStakingPercentage({
       value: -1,
       label: '',
@@ -219,9 +218,19 @@ export default function StakingInfo({
       setButtonApproveDisabled(
         Number.isNaN(parseFloat(value)) || !(parseFloat(value) > 0)
       )
+      setAmountState(value)
     } catch (e) {
       console.log(e)
     }
+  }
+
+  const handleSetShow = (checked: boolean) => {
+    setStakingPercentage({
+      value: -1,
+      label: '',
+    })
+    setAmount('')
+    setShow(checked)
   }
 
   useEffect(() => {
@@ -362,10 +371,19 @@ export default function StakingInfo({
       )
       console.log('USE user balance', balance.toString())
       console.log('USE token', token)
+      /*
       const bal = formatNumber(
         Number(ethers.utils.formatUnits(balance, token.decimals))
       )
+      */
+      const bal = Number(
+        ethers.utils.formatUnits(balance, token.decimals)
+      ).toFixed(6)
 
+      console.log(
+        'user raw balance',
+        Number(ethers.utils.formatUnits(balance, token.decimals))
+      )
       const APR = calculateAPR(poolInfo, token.decimals)
       console.log('APR', APR)
 
@@ -707,7 +725,10 @@ export default function StakingInfo({
   return (
     <>
       <div className="py-3">
-        <CustomSwitch show={show} setShow={(checked) => setShow(checked)} />
+        <CustomSwitch
+          show={show}
+          setShow={(checked) => handleSetShow(checked)}
+        />
       </div>
 
       <div>

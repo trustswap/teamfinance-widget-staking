@@ -36,7 +36,7 @@ export default function StakingData({
     if (chain) {
       setChainName(
         supportedChains.find(
-          (userChain) => userChain.chainId === toHex(chain.id )
+          (userChain) => userChain.chainId === toHex(chain.id)
         )?.name ?? 'Chain not supported'
       )
     }
