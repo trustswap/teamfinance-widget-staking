@@ -122,6 +122,10 @@ export default function StakingInfo({
 
   const setAmount = (value: string) => {
     setAmountState(value)
+    setStakingPercentage({
+      value: -1,
+      label: '',
+    })
     try {
       const userBalanceFloat = parseFloat(userBalance.replace(',', ''))
       const userStakeAmountFloat = parseFloat(userStakedAmount.replace(',', ''))
@@ -178,7 +182,7 @@ export default function StakingInfo({
         formattedAmount.toString(),
         stakeAllowedValue.toString()
       )
-      if (formattedAmount.gte(stakeAllowedValue)) {
+      if (formattedAmount.gt(stakeAllowedValue)) {
         console.log(
           'part 6 value exceed the global maximim',
           formattedAmount.gt(stakeAllowedValue)
@@ -338,7 +342,7 @@ export default function StakingInfo({
         BigNumber.from(poolId)
       )
       const userInfo = res[0]
-      const pendingReward = res[1]
+      const pendingReward = res[1] ?? BigNumber.from(0)
       const poolInfo = res[2]
 
       const stakingTokenAddress = poolInfo.stakingToken
@@ -435,7 +439,6 @@ export default function StakingInfo({
   }, [address, contractAddress, poolId, chain])
 
   const handleClick = (buttonValue: StakingPercentage) => {
-    setStakingPercentage(buttonValue)
     let balanceToCalc = userStakedAmount
     if (!show) {
       balanceToCalc = userBalance
@@ -452,6 +455,7 @@ export default function StakingInfo({
         parseFloat(balanceToCalc.replaceAll(',', '.')) * buttonValue.value
       ).toString()
     )
+    setStakingPercentage(buttonValue)
   }
 
   const estimateGas = async (
@@ -549,7 +553,7 @@ export default function StakingInfo({
         parseFloat(amount) ? amount : '0',
         stakingToken.decimals.toString()
       )
-      if (formattedAmountCheck.gte(stakeAllowedValue)) {
+      if (formattedAmountCheck.gt(stakeAllowedValue)) {
         console.log(
           'Stake Canceled',
           formattedAmountCheck.gt(stakeAllowedValue)

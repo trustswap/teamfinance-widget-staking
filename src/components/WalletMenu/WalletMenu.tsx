@@ -6,6 +6,7 @@ import {
   BiCheck,
   BiChevronDown,
   BiChevronRight,
+  BiCube,
   BiLinkExternal,
 } from 'react-icons/bi'
 import Jazzicon, { jsNumberForAddress } from 'react-jazzicon'
@@ -52,7 +53,7 @@ export default function WalletMenu({ supportedChainsList }: WaletMenuProps) {
   const { disconnect } = useDisconnect()
   const { data: ensData } = useEnsName({ address, chainId: 1 })
   const [readableAddress, setReadableAddress] = useState('')
-
+  const [isUnsuportedChain, setUnsupportedChain] = useState(true)
   const { width } = useWindowSize()
 
   const menuItems = [{ name: 'Disconnect', onClick: () => disconnect() }]
@@ -71,6 +72,7 @@ export default function WalletMenu({ supportedChainsList }: WaletMenuProps) {
     try {
       if (chain?.id) {
         setOpenUnsupportedChain(!supportedChainIds.includes(chain.id))
+        setUnsupportedChain(!supportedChainIds.includes(toHex(chain.id)))
       }
     } catch (error) {
       console.error(error)
@@ -136,13 +138,17 @@ export default function WalletMenu({ supportedChainsList }: WaletMenuProps) {
           className="-mr-px flex h-9 w-9 items-center justify-center rounded-l-md border bg-white focus:outline-none hover:bg-gray-100"
           onClick={() => setChainSelectorModalOpen(true)}
         >
-          <Image
-            src={currentChain.icon}
-            className="h-5 w-5"
-            width={20}
-            height={20}
-            alt="Icon"
-          />
+          {isUnsuportedChain ? (
+            <BiCube className="text-black-lm h-5 w-5" />
+          ) : (
+            <Image
+              src={currentChain.icon}
+              className="h-5 w-5"
+              width={20}
+              height={20}
+              alt="Icon"
+            />
+          )}
         </button>
         <Menu as="div" className="">
           {({ open }) => (
