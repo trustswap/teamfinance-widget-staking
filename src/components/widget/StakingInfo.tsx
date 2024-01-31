@@ -378,7 +378,7 @@ export default function StakingInfo({
       */
       const bal = Number(
         ethers.utils.formatUnits(balance, token.decimals)
-      ).toFixed(6)
+      ).toFixed(token.decimals)
 
       console.log(
         'user raw balance',
@@ -471,7 +471,7 @@ export default function StakingInfo({
     setAmount(
       (
         parseFloat(balanceToCalc.replaceAll(',', '.')) * buttonValue.value
-      ).toString()
+      ).toFixed(stakingToken.decimals)
     )
     setStakingPercentage(buttonValue)
   }
