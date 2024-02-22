@@ -1,5 +1,0 @@
-export { default as burnableTeamTokenBytecode_zkSync } from './burnableTeamToken'
-export { default as mintableTeamTokenBytecode_zkSync } from './mintableTeamToken'
-export { default as mintBurnTeamTokenBytecode_zkSync } from './mintBurnTeamToken'
-export { default as taxableTeamTokenBytecode_zkSync } from './taxableToken'
-export { default as teamTokenBytecode_zkSync } from './teamToken'

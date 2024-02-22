@@ -1,5 +1,0 @@
-export { default as burnableTeamTokenBytecode } from './burnableTeamToken'
-export { default as mintableTeamTokenBytecode } from './mintableTeamToken'
-export { default as mintBurnTeamTokenBytecode } from './mintBurnTeamToken'
-export { default as taxableTeamTokenBytecode } from './taxableToken'
-export { default as teamTokenBytecode } from './teamToken'
