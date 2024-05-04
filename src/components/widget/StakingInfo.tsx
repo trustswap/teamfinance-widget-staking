@@ -425,21 +425,18 @@ export default function StakingInfo({
       let totalToStake = BigNumber.from(0)
       if (version.toNumber() === 2) {
         const poolLimit = await wagmi.Reader.getPoolStakeLimit(poolId)
-        setStakeAllowedValue(poolLimit)
+        totalToStake = poolLimit.sub(poolInfo.totalStaked)
+      } else if (globalMaxAmount && globalMaxAmount > 0) {
+        console.log('Current totalStaked', poolInfo.totalStaked)
+        const formattedAmount = ethers.utils.parseUnits(
+          globalMaxAmount.toString(),
+          token.decimals
+        )
+        totalToStake = formattedAmount.sub(poolInfo.totalStaked)
       } else {
-        if (globalMaxAmount && globalMaxAmount > 0) {
-          console.log('Current totalStaked', poolInfo.totalStaked)
-          const formattedAmount = ethers.utils.parseUnits(
-            globalMaxAmount.toString(),
-            token.decimals
-          )
-          totalToStake = formattedAmount.sub(poolInfo.totalStaked)
-        } else {
-          totalToStake = BigNumber.from(constants.MaxUint256)
-        }
-        setStakeAllowedValue(totalToStake)
+        totalToStake = BigNumber.from(constants.MaxUint256) 
       }
-
+      setStakeAllowedValue(totalToStake)
       setErrorMessage('')
     } catch (error) {
       console.error(error)
