@@ -147,7 +147,6 @@ export default function TestWidget() {
 | globalMaxAmount | (optional) set the max amount of tokens global on the pool (for all users) | 
 | maxStakingAmount |  (optional) set the max amount of tokens that the each user can stake |
 | stakeOnlyOnce |  (optional) Boolean, if true: Blocks users to stake if they already have staked |
-| blockWithdrawUntilEnd | (optional) Boolean, if true: Block users to withdraw before the pool end period |
 | supportedChains | The list of objects for the supported chains (see supportedChain Object|
 | classNames | (optional) Tailwind css classes to customize the look and feel |
 

@@ -47,7 +47,6 @@ const ClaimInfoData: InfoMessage[] = [
 interface StakeInfoProps {
   maxStakingAmount?: number
   stakeOnlyOnce?: boolean
-  blockWithdrawUntilEnd?: boolean
   supportedChains: ChainType[]
   globalMaxAmount?: number
 }
@@ -55,7 +54,6 @@ interface StakeInfoProps {
 export default function StakingInfo({
   maxStakingAmount,
   stakeOnlyOnce,
-  blockWithdrawUntilEnd,
   supportedChains,
   globalMaxAmount,
 }: StakeInfoProps) {
@@ -140,10 +138,7 @@ export default function StakingInfo({
       console.log('part4', !!stakeOnlyOnce && userStakeAmountFloat > 0)
       console.log(
         'part5',
-        !!blockWithdrawUntilEnd &&
-          poolEndTime.gt(
-            BigNumber.from(Math.floor(new Date().getTime() / 1000))
-          )
+        poolEndTime.gt(BigNumber.from(Math.floor(new Date().getTime() / 1000)))
       )
 
       if (!!stakeOnlyOnce && userStakeAmountFloat > 0) {
@@ -153,7 +148,6 @@ export default function StakingInfo({
       }
 
       if (
-        !!blockWithdrawUntilEnd &&
         poolEndTime.gt(BigNumber.from(Math.floor(new Date().getTime() / 1000)))
       ) {
         setClaimInfo(0, true)
@@ -211,10 +205,9 @@ export default function StakingInfo({
         Number.isNaN(parseFloat(value)) ||
           !(parseFloat(value) > 0) ||
           userStakeAmountFloat < parseFloat(value) ||
-          (!!blockWithdrawUntilEnd &&
-            poolEndTime.gt(
-              BigNumber.from(Math.floor(new Date().getTime() / 1000))
-            ))
+          poolEndTime.gt(
+            BigNumber.from(Math.floor(new Date().getTime() / 1000))
+          )
       )
 
       setButtonApproveDisabled(

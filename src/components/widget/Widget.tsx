@@ -17,7 +17,6 @@ interface WidgetProps {
   className?: string
   maxStakingAmount?: number
   stakeOnlyOnce?: boolean
-  blockWithdrawUntilEnd?: boolean
   supportedChains: ChainType[]
   globalMaxAmount?: number
 }
@@ -27,7 +26,6 @@ export default function Widget({
   title,
   maxStakingAmount,
   stakeOnlyOnce,
-  blockWithdrawUntilEnd,
   supportedChains,
   globalMaxAmount,
 }: WidgetProps) {
@@ -51,7 +49,6 @@ export default function Widget({
         <StakingInfo
           maxStakingAmount={maxStakingAmount}
           stakeOnlyOnce={stakeOnlyOnce}
-          blockWithdrawUntilEnd={blockWithdrawUntilEnd}
           supportedChains={supportedChains}
           globalMaxAmount={globalMaxAmount}
         />
