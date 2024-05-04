@@ -39,7 +39,7 @@ export const useWagmi = () => {
   }
 
 
-  const setContractAddress = (contractAddress:string) => {
+  const setContractAddress = (contractAddress: string) => {
     rewardsServiceContract.address = contractAddress
   }
 
@@ -50,7 +50,7 @@ export const useWagmi = () => {
     address: any,
     pool_id: BigNumber
   ): Promise<any> => {
-    const [userInfo, pendingReward, poolInfo] = await multicall({
+    const [userInfo, pendingReward, poolInfo, version] = await multicall({
       chainId: chain?.id,
       contracts: [
         {
@@ -68,9 +68,14 @@ export const useWagmi = () => {
           functionName: 'poolInfo',
           args: [pool_id],
         },
+        {
+          ...rewardsServiceContract,
+          functionName: 'currentVersion',
+          args: [],
+        },
       ] as any,
     })
-    return [userInfo, pendingReward, poolInfo]
+    return [userInfo, pendingReward, poolInfo, version]
   }
 
   const getPools = async (): Promise<any> => {
@@ -85,6 +90,20 @@ export const useWagmi = () => {
       ] as any,
     })
     return pools
+  }
+
+  const getPoolStakeLimit = async (pool_id: number): Promise<any> => {
+    const [poolStakeLimit] = await multicall({
+      chainId: chain?.id,
+      contracts: [
+        {
+          ...rewardsServiceContract,
+          functionName: 'poolStakeLimit',
+          args: [pool_id],
+        },
+      ] as any,
+    })
+    return poolStakeLimit
   }
   /**
    *
@@ -182,6 +201,7 @@ export const useWagmi = () => {
   const Reader = {
     getPoolAndUserInfo,
     getPools,
+    getPoolStakeLimit,
   }
 
   /**
@@ -208,7 +228,7 @@ export const useWagmi = () => {
     approve,
   }
 
-  return { Transaction, Contracts, Reader, Token , setContractAddress }
+  return { Transaction, Contracts, Reader, Token, setContractAddress }
 }
 
 export default useWagmi

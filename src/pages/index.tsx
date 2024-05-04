@@ -17,7 +17,7 @@ export default function TestWidget() {
       },
       blockExplorerUrls: ['https://bscscan.com'],
       type: 'mainnet',
-      contractAddress: '0x101119A32aFb86D3fAD674baE0a8dC9EE5f69CEE',
+      contractAddress: '0x12682aca91DC386e649728F6935Bc621AAcC267E',
       poolId: 0,
     },
     {
@@ -32,43 +32,70 @@ export default function TestWidget() {
       },
       blockExplorerUrls: ['https://testnet.bscscan.com'],
       type: 'testnet',
-      contractAddress: '0x101119A32aFb86D3fAD674baE0a8dC9EE5f69CEE',
+      contractAddress: '0x0f2A5800f9Da5Fc765D28d64b554036b58fA8156',
       poolId: 0,
     },
   ]
 
+  /*
+  const supportedChains1: any[] = [
+    {
+      name: 'Binance Smart Chain',
+      chainId: '0x38',
+      icon: 'https://assets.coingecko.com/coins/images/825/standard/bnb-icon2_2x.png?169650197',
+      rpcUrls: ['https://bsc-dataseed.binance.org'],
+      nativeCurrency: {
+        name: 'Binance Smart Chain',
+        symbol: 'BNB',
+        decimals: 18,
+      },
+      blockExplorerUrls: ['https://bscscan.com'],
+      type: 'mainnet',
+      contractAddress: '0xD98287c1A455Fe4B57Dc2932F8B6b5d8938C7255',
+      poolId: 1,
+    },
+  ]
+
+  const supportedChains2: any[] = [
+    {
+      name: 'Binance Smart Chain',
+      chainId: '0x38',
+      icon: 'https://assets.coingecko.com/coins/images/825/standard/bnb-icon2_2x.png?169650197',
+      rpcUrls: ['https://bsc-dataseed.binance.org'],
+      nativeCurrency: {
+        name: 'Binance Smart Chain',
+        symbol: 'BNB',
+        decimals: 18,
+      },
+      blockExplorerUrls: ['https://bscscan.com'],
+      type: 'mainnet',
+      contractAddress: '0xD98287c1A455Fe4B57Dc2932F8B6b5d8938C7255',
+      poolId: 2,
+    },
+  ]
+  const supportedChains3: any[] = [
+    {
+      name: 'Binance Smart Chain',
+      chainId: '0x38',
+      icon: 'https://assets.coingecko.com/coins/images/825/standard/bnb-icon2_2x.png?169650197',
+      rpcUrls: ['https://bsc-dataseed.binance.org'],
+      nativeCurrency: {
+        name: 'Binance Smart Chain',
+        symbol: 'BNB',
+        decimals: 18,
+      },
+      blockExplorerUrls: ['https://bscscan.com'],
+      type: 'mainnet',
+      contractAddress: '0xD98287c1A455Fe4B57Dc2932F8B6b5d8938C7255',
+      poolId: 3,
+    },
+  ]
+  */
+ 
   return (
     <div className="grid min-h-screen grid-cols-2 gap-4 bg-[#505050]">
-      <div className="text-white">
-        <p className="mb-5 pl-5 pt-10 text-5xl text-white">
-          User Content Title!
-        </p>
-        <p className="pl-5 pt-2 text-white">
-          User content can be here... User content can be here...
-        </p>
-        <p className="pl-5 pt-2 text-white">
-          User content can be here... User content can be here...
-        </p>
-        <p className="pl-5 pt-2 text-white">
-          User content can be here... User content can be here...
-        </p>
-        <p className="pl-5 pt-2 text-white">
-          User content can be here... User content can be here...
-        </p>
-        <p className="pl-5 pt-2 text-white">
-          User content can be here... User content can be here...
-        </p>
-        <p className="pl-5 pt-2 text-white">
-          User content can be here... User content can be here...
-        </p>
-      </div>
-
       <div className="flex justify-end bg-[#505050]">
-        <Widget
-          title="Swap Staking Pool 1"
-          supportedChains={supportedChains}
-          globalMaxAmount={40}
-        />
+        <Widget title="Swap Staking Pool 0" supportedChains={supportedChains} />
       </div>
     </div>
   )

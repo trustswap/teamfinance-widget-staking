@@ -106,6 +106,8 @@ export default function StakingInfo({
   const [stakingInfoMessages, setStakingInfoMessages] =
     useState(StakingInfoData)
   const [stakeAllowedValue, setStakeAllowedValue] = useState(BigNumber.from(0))
+  const [, setPoolVersion] = useState(null)
+
   const setClaimInfo = (id: number, status: boolean, message?: string) => {
     const msgs = claimInfoMessages
     msgs[id].active = status
@@ -353,6 +355,10 @@ export default function StakingInfo({
       const userInfo = res[0]
       const pendingReward = res[1] ?? BigNumber.from(0)
       const poolInfo = res[2]
+      const version = res[3]
+
+      console.log('Contract version', version.toNumber())
+      setPoolVersion(version.toNumber())
 
       const stakingTokenAddress = poolInfo.stakingToken
       const [tokenAllowance, balance] =
@@ -391,8 +397,6 @@ export default function StakingInfo({
         Number(ethers.utils.formatUnits(userInfo.amount, token.decimals))
       )
 
-      const pools = await wagmi.Reader.getPools()
-      console.log(pools)
       const formattedTotalRewards = parseFloat(
         ethers.utils.formatUnits(poolInfo.totalReward, token.decimals)
       )
@@ -426,17 +430,22 @@ export default function StakingInfo({
 
       console.log('entering globalMaxAmount', globalMaxAmount)
       let totalToStake = BigNumber.from(0)
-      if (globalMaxAmount && globalMaxAmount > 0) {
-        console.log('Current totalStaked', poolInfo.totalStaked)
-        const formattedAmount = ethers.utils.parseUnits(
-          globalMaxAmount.toString(),
-          token.decimals
-        )
-        totalToStake = formattedAmount.sub(poolInfo.totalStaked)
+      if (version.toNumber() === 2) {
+        const poolLimit = await wagmi.Reader.getPoolStakeLimit(poolId)
+        setStakeAllowedValue(poolLimit)
       } else {
-        totalToStake = BigNumber.from(constants.MaxUint256)
+        if (globalMaxAmount && globalMaxAmount > 0) {
+          console.log('Current totalStaked', poolInfo.totalStaked)
+          const formattedAmount = ethers.utils.parseUnits(
+            globalMaxAmount.toString(),
+            token.decimals
+          )
+          totalToStake = formattedAmount.sub(poolInfo.totalStaked)
+        } else {
+          totalToStake = BigNumber.from(constants.MaxUint256)
+        }
+        setStakeAllowedValue(totalToStake)
       }
-      setStakeAllowedValue(totalToStake)
 
       setErrorMessage('')
     } catch (error) {
