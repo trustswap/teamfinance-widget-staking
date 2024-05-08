@@ -386,8 +386,8 @@ export default function StakingInfo({
       const APR = calculateAPR(poolInfo, token.decimals)
       console.log('APR', APR)
 
-      const userAmountStaked = formatNumber(
-        Number(ethers.utils.formatUnits(userInfo.amount, token.decimals))
+      const  userAmountStaked = parseFloat(
+        ethers.utils.formatUnits(userInfo.amount, token.decimals)
       )
 
       const formattedTotalRewards = parseFloat(
