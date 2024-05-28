@@ -1,3 +1,5 @@
+⚠️ THE WIDGET IS NOW AVAIABLE ON THE NEW REPO: https://github.com/trustswap/teamfinance-widgets
+
 # teamfinance-widget-staking
 Team Finance Staking Widget
 
